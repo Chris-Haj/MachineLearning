@@ -71,4 +71,7 @@ def gradientDescent(x, y, theta, alpha, iterations):
 # h) We learned in class 3 algorithms Momentum, Adagrad, Adam.
 
 if __name__ == '__main__':
+    x,y = createDataSet()
+    x = normalizeData(addOnesColumn(x))
+
 
