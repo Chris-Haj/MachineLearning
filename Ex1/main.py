@@ -98,6 +98,12 @@ def adamGradientDescent(x, y, theta, alpha, iterations, batchSize, beta1, beta2,
 
 
 if __name__ == '__main__':
+    test = [5,3,1,2]
+
+
+    pass
+
+
     data, x, y = createDataSet()
     x = addColumnOfOnes(normalizeData(x))
     theta = np.zeros(x.shape[1])
@@ -105,31 +111,31 @@ if __name__ == '__main__':
     iterations = 1000
     batchSize = 32
 
-    for alpha in alphas:
+    for i,alpha in enumerate(alphas):
         theta, costHistory = gradientDescent(x, y, theta, alpha, iterations)
         print("Theta: ", theta)
         print("Cost: ", costHistory[-1])
         plt.plot(range(iterations), costHistory)
         plt.xlabel("Iterations")
         plt.ylabel("Cost")
-        plt.title("Cost vs Iterations")
+        plt.title(f"Cost vs Iterations Gradient Descent {alpha,i}")
         plt.show()
-    for alpha in alphas:
+    for i, alpha in enumerate(alphas):
         theta, costHistory = miniBatchGradientDescent(x, y, theta, alpha, iterations, batchSize)
         print("Theta: ", theta)
         print("Cost: ", costHistory[-1])
         plt.plot(range(iterations), costHistory)
         plt.xlabel("Iterations")
         plt.ylabel("Cost")
-        plt.title("Cost vs Iterations")
+        plt.title(f"Cost vs Iterations Minibatch {alpha,i}")
         plt.show()
 
-    for alpha in alphas:
+    for i, alpha in enumerate(alphas):
         theta, costHistory = adagradGradientDescent(x, y, theta, alpha, iterations, batchSize)
         print("Theta: ", theta)
         print("Cost: ", costHistory[-1])
         plt.plot(range(iterations), costHistory)
         plt.xlabel("Iterations")
         plt.ylabel("Cost")
-        plt.title("Cost vs Iterations")
+        plt.title(f"Cost vs Iterations Adagrad {alpha,i}")
         plt.show()
