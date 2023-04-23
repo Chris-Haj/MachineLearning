@@ -18,8 +18,6 @@ if __name__ == '__main__':
     data, x, y = createDataSet()
     imputer = SimpleImputer(missing_values=np.nan, strategy='mean')
     imputer.fit(x[:, 1: 3])
-    print(x)
-    print()
     x[:, 1:3] = imputer.transform(x[:, 1:3])
     columnTrans = ColumnTransformer(transformers=[('encoder', OneHotEncoder(), [0])], remainder='passthrough')
     print(x)
