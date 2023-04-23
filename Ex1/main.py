@@ -73,5 +73,26 @@ def gradientDescent(x, y, theta, alpha, iterations):
 if __name__ == '__main__':
     x,y = createDataSet()
     x = normalizeData(addOnesColumn(x))
+   theta = np.zeros(x.shape[1])
+    alpha = 0.01
+    iterations = 1000
+    batchSize = 32
 
+    theta, costHistory = gradientDescent(x, y, theta, alpha, iterations)
+    print("Theta: ", theta)
+    print("Cost: ", costHistory[-1])
+
+    theta, costHistory = miniBatchGradientDescent(x, y, theta, alpha, iterations, batchSize)
+    print("Theta: ", theta)
+    print("Cost: ", costHistory[-1])
+
+    theta, costHistory = adagradGradientDescent(x, y, theta, alpha, iterations, batchSize)
+    print("Theta: ", theta)
+    print("Cost: ", costHistory[-1])
+
+    plt.plot(range(iterations), costHistory)
+    plt.xlabel("Iterations")
+    plt.ylabel("Cost")
+    plt.title("Cost vs Iterations")
+    plt.show()
 
