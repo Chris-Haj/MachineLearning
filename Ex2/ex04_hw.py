@@ -1,19 +1,6 @@
 import pandas as pd
 import numpy as np
 
-"""
-# Homework 4
-
-In this homework, you will use the movies and actors datasets:
-    - movies: tmdb_5000_movies.csv
-    - actors: actors.csv
-
-To merge the datasets, you can use the following information:
-    - movies['original_title'] == actors['movie_title']
-    - sometimes, there will be mistmatches in the movie titles, ignore this, 
-    treat mismatched movies as different movies
-"""
-
 
 def repeated_movie_titles(
         fn_movies: str,
@@ -30,6 +17,7 @@ def repeated_movie_titles(
     data = pd.read_csv(fn_movies)
     counts = data['original_title'].value_counts()
     return counts[counts > 1]
+
 
 def actors_in_top_movies(
         fn_movies: str,
@@ -57,15 +45,13 @@ def actors_in_top_movies(
 
     Returns:
         DataFrame with columns 'movie_name', 'movie_score', 'actor_name'
-
     """
     actors = pd.read_csv(fn_actors)
     movies = pd.read_csv(fn_movies)
-
-
-
-
-
+    RevWeights = (movies['revenue'] * revenue_weight).astype(int)
+    VoteWeights = (movies['vote_average'] * vote_weight).astype(int)
+    BudgetWeights = (movies['budget'] * budget_weight).astype(int)
+    FinalScore = RevWeights + VoteWeights + BudgetWeights
 
 
 def actors_with_most_collaborations(
@@ -115,6 +101,7 @@ def highest_grossing_movies_by_year(
     """
     movies = pd.read_csv(fn_movies)
 
+
 ## Extra Credit
 
 def actors_with_highest_median_score(
@@ -146,11 +133,10 @@ def actors_with_highest_median_score(
     actors = pd.read_csv('actors.csv')
     movies = pd.read_csv('tmdb_5000_movies.csv')
 
-if __name__ == '__main__':
-    actors = pd.read_csv('actors.csv')
-    movies = pd.read_csv('tmdb_5000_movies.csv')
-    data = actors
-    counts = data['movie_title'].value_counts()
-    dupes = counts[counts > 1]
 
-    print(dupes)
+if __name__ == '__main__':
+    # actors = pd.read_csv('actors.csv').head(10)
+    movies = pd.read_csv('tmdb_5000_movies.csv').head(10)
+    another = (movies['revenue'] * 0.5).astype(int)  # Halve and convert to int
+    movies = movies['revenue']
+    print(movies + another)
