@@ -52,6 +52,7 @@ def actors_in_top_movies(
     VoteWeights = (movies['vote_average'] * vote_weight).astype(int)
     BudgetWeights = (movies['budget'] * budget_weight).astype(int)
     FinalScore = RevWeights + VoteWeights + BudgetWeights
+    return FinalScore
 
 
 def actors_with_most_collaborations(
@@ -136,7 +137,7 @@ def actors_with_highest_median_score(
 
 if __name__ == '__main__':
     # actors = pd.read_csv('actors.csv').head(10)
-    movies = pd.read_csv('tmdb_5000_movies.csv').head(10)
-    another = (movies['revenue'] * 0.5).astype(int)  # Halve and convert to int
-    movies = movies['revenue']
-    print(movies + another)
+    actors = 'actors.csv'
+    movies = 'tmdb_5000_movies.csv'
+    res = actors_in_top_movies(movies,actors)
+    print(res)
