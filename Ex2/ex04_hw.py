@@ -1,7 +1,39 @@
 import pandas as pd
+
+"""
+# Homework 4
+
+In this homework, you will use the movies and actors datasets:
+    - movies: tmdb_5000_movies.csv
+    - actors: actors.csv
+
+To merge the datasets, you can use the following information:
+    - movies['original_title'] == actors['movie_title']
+    - sometimes, there will be mistmatches in the movie titles, ignore this, 
+    treat mismatched movies as different movies
+
+
+Submission instructions:
+    - only submit the `ex04_hw.py` file. Don't zip it.
+    - Make sure to include your id number in the `get_id_number` function.
+    - Make sure to remove any code that is not part of the functions you are implementing.
+    - Do not change the function signatures.
+    - Do not add any additional imports
+"""
+
+import pandas as pd
 import numpy as np
 
 
+def get_id_number() -> str:
+    """
+    Return your ID number AS A STRING.
+    You don't get points for this function. :-)
+    """
+    return '207824772'
+
+
+get_id_number()  # call the function to make sure it runs
 def repeated_movie_titles(
         fn_movies: str,
 ) -> pd.DataFrame:
@@ -117,6 +149,31 @@ def highest_grossing_movies_by_year(
     """
     movies = pd.read_csv(fn_movies)
 
+    movies['Year'] = pd.to_datetime(movies['release_date']).dt.year
+
+    movies['revenue'] = pd.to_numeric(movies['revenue'], errors='coerce').fillna(0)
+
+    yearly_stats = movies.groupby('Year').agg(
+        Total_Revenue=('revenue', 'sum'),
+        Max_Revenue=('revenue', 'max')
+    )
+    top_years = yearly_stats.sort_values(by='Total_Revenue', ascending=False).head(n_years).index
+    top_movies_by_year = movies[movies['Year'].isin(top_years)]
+
+    highest_grossing = top_movies_by_year.loc[top_movies_by_year.groupby('Year')['revenue'].idxmax()]
+
+    final_stats = highest_grossing.groupby('Year').agg(
+        Movie_Name=('original_title', 'first'),
+        Total_Revenue=('revenue', 'sum'),
+        Average_Revenue=('revenue', lambda x: x.mean()),
+        Standard_Deviation_of_Revenue=('revenue', 'std'),
+        Number_of_Movies=('original_title', 'count')
+    ).reset_index()
+    final_stats['Standard_Deviation_of_Revenue'] = final_stats['Standard_Deviation_of_Revenue'].fillna(0)
+    final_stats = final_stats.sort_values(by='Year', ascending=True)
+
+    return final_stats
+
 
 ## Extra Credit
 
@@ -148,11 +205,14 @@ def actors_with_highest_median_score(
 
     actors = pd.read_csv('actors.csv')
     movies = pd.read_csv('tmdb_5000_movies.csv')
+    merged_df = pd.merge(movies[['original_title', 'vote_average']], actors, left_on='original_title',
+                         right_on='movie_title')
+
+    median_scores = merged_df.groupby('actor_name')['vote_average'].median().reset_index()
+    top_actors = median_scores.sort_values(by='vote_average', ascending=False).head(n_actors)
+    top_actors.columns = ['Actor Name', 'Median Vote Average']
+
+    return top_actors
 
 
-if __name__ == '__main__':
-    # actors = pd.read_csv('actors.csv').head(10)
-    actors = 'actors.csv'
-    movies = 'tmdb_5000_movies.csv'
-    res = actors_with_most_collaborations(actors,5)
-    print(res)
+
