@@ -51,8 +51,18 @@ def actors_in_top_movies(
     RevWeights = (movies['revenue'] * revenue_weight).astype(int)
     VoteWeights = (movies['vote_average'] * vote_weight).astype(int)
     BudgetWeights = (movies['budget'] * budget_weight).astype(int)
-    FinalScore = RevWeights + VoteWeights + BudgetWeights
-    return FinalScore
+
+    movies['score'] = RevWeights + VoteWeights + BudgetWeights
+    topMovies = movies.nlargest(n_movies, 'score')
+    top_movie_actors = pd.merge(topMovies, actors, left_on='original_title', right_on='movie_title')
+
+    result = top_movie_actors[['original_title', 'score', 'actor_name']]
+    result.columns = ['movie_name', 'movie_score', 'actor_name']
+    result['movie_score'] = result['movie_score'].round(1)
+
+    result = result.sort_values(by=['movie_score', 'actor_name'], ascending=[False, True])
+
+    return result
 
 
 def actors_with_most_collaborations(
@@ -73,7 +83,12 @@ def actors_with_most_collaborations(
 
     """
     actors = pd.read_csv(fn_actors)
-    raise NotImplementedError()
+    actor_pairs = pd.merge(actors, actors, on='movie_title')
+    different_pairs = actor_pairs[actor_pairs['actor_id_x'] != actor_pairs['actor_id_y']]
+    collaboration_counts = different_pairs.groupby('actor_name_x')['actor_name_y'].nunique()
+    top_actors = collaboration_counts.sort_values(ascending=False).head(n_actors).reset_index()
+    top_actors.columns = ['actor_name', 'n_collaborations']
+    return top_actors
 
 
 def highest_grossing_movies_by_year(
@@ -139,5 +154,5 @@ if __name__ == '__main__':
     # actors = pd.read_csv('actors.csv').head(10)
     actors = 'actors.csv'
     movies = 'tmdb_5000_movies.csv'
-    res = actors_in_top_movies(movies,actors)
+    res = actors_with_most_collaborations(actors,5)
     print(res)
