@@ -38,7 +38,25 @@ def get_number_of_features_that_explain_variance(
     30 points
     """
 
-    raise NotImplementedError()
+    try:
+        df = df.drop(columns=['original_title'])
+    except:
+        pass
+
+    data = df.values
+    # SVD
+    svd = TruncatedSVD(n_components=min(df.shape) - 1)
+    svd.fit(data)
+    cumulative_variance_svd = np.cumsum(svd.explained_variance_ratio_)
+    n_features_svd = np.argmax(cumulative_variance_svd >= explained_variance_ratio) + 1
+
+    # PCA
+    pca = PCA(n_components=min(df.shape) - 1)
+    pca.fit(data)
+    cumulative_variance_pca = np.cumsum(pca.explained_variance_ratio_)
+    n_features_pca = np.argmax(cumulative_variance_pca >= explained_variance_ratio) + 1
+    print('done')
+    return n_features_svd, n_features_pca
 
 
 def compute_rmse(d1, d2) -> float:
@@ -56,7 +74,7 @@ def compute_rmse(d1, d2) -> float:
 
     5 points
     """
-    raise NotImplementedError()
+    return np.sqrt(np.mean((d1 - d2) ** 2))
 
 
 def compute_reconstructed_error_svd(data: np.ndarray, n_components: int) -> float:
@@ -72,7 +90,10 @@ def compute_reconstructed_error_svd(data: np.ndarray, n_components: int) -> floa
 
     10 points
     """
-    raise NotImplementedError()
+    svd = TruncatedSVD(n_components=n_components)
+    data_transformed = svd.fit_transform(data)
+    data_reconstructed = svd.inverse_transform(data_transformed)
+    return compute_rmse(data, data_reconstructed)
 
 
 def compute_reconstructed_error_pca(data: np.ndarray, n_components: int) -> float:
@@ -88,7 +109,10 @@ def compute_reconstructed_error_pca(data: np.ndarray, n_components: int) -> floa
 
     10 points
     """
-    raise NotImplementedError()
+    svd = TruncatedSVD(n_components=n_components)
+    data_transformed = svd.fit_transform(data)
+    data_reconstructed = svd.inverse_transform(data_transformed)
+    return compute_rmse(data, data_reconstructed)
 
 
 def compute_k_svd_raw() -> int:
@@ -103,7 +127,12 @@ def compute_k_svd_raw() -> int:
 
     5 points
     """
-    raise NotImplementedError()
+    df = pd.read_csv('data_hw.csv').drop(columns=['original_title'])
+    u, s, vt = np.linalg.svd(df, full_matrices=False)
+    explained_variance = np.square(s) / np.sum(np.square(s))
+    cumulative_variance = np.cumsum(explained_variance)
+    n_features = np.argmax(cumulative_variance >= 0.9) + 1
+    return n_features
 
 
 def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
@@ -118,7 +147,7 @@ def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
 
     5 points
     """
-    raise NotImplementedError()
+    return (df - df.mean()) / df.std()
 
 
 def compute_k_svd_normalized() -> int:
@@ -135,7 +164,12 @@ def compute_k_svd_normalized() -> int:
 
     5 points
     """
-    raise NotImplementedError()
+    df = pd.read_csv('data_hw.csv').drop(columns=['original_title'])
+    u, s, vt = np.linalg.svd(df, full_matrices=False)
+    explained_variance = np.square(s) / np.sum(np.square(s))
+    cumulative_variance = np.cumsum(explained_variance)
+    n_features = np.argmax(cumulative_variance >= 0.9) + 1
+    return n_features
 
 
 def explain_the_different_ks():
@@ -146,10 +180,16 @@ def explain_the_different_ks():
     Return your answer as a string.
     30 points
     """
+
     explanation = """
-    
-    """
-    raise NotImplementedError()
+       The number of features (K) needed to explain at least 90% of the variance in the dataset
+        may be different between the raw and normalized data because of the scaling done to the data.
+        Normalization can affect the distribution of the data, potentially leading to a different amount of principal 
+        components being needed to explain the same level of variance. If the raw data has features on very different scales, 
+        PCA and SVD may focus more on the variance along the features with larger scales. After normalization, all features have the 
+        same scale, potentially leading to a more balanced distribution of variance across principal components and possibly 
+        requiring a different number of components to explain 90% of the variance.
+       """
     return explanation
 
 
@@ -157,13 +197,8 @@ if __name__ == "__main__":
     assert isinstance(get_id_number(), str)
     id_number = int(get_id_number())
     assert str(id_number) == get_id_number()
-    df = pd.read_csv('data_hw.csv').head(15)
-    string_col = df.iloc[:, 0]
-    df_numeric = df.drop(df.columns[0], axis=1)
-    data = df_numeric.to_numpy()
-    dataMean = np.mean(data, axis=0)
-    dataSTD = np.std(data, axis=0)
-    standardizedData = (data - dataMean) / dataSTD
-    standardizedDF = pd.DataFrame(standardizedData, columns=df_numeric.columns)
-    standardizedDF.insert(0, df.columns[0], string_col)
-    print(standardizedDF[0:5,0:5])
+    try:
+        df = pd.read_csv('data_hw.csv').drop(columns='random')
+    except KeyError:
+        pass
+    # get_number_of_features_that_explain_variance(df, 0.3)
