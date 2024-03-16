@@ -42,7 +42,6 @@ def get_number_of_features_that_explain_variance(
         df = df.drop(columns=['original_title'])
     except:
         pass
-
     data = df.values
     # SVD
     svd = TruncatedSVD(n_components=min(df.shape) - 1)
@@ -55,7 +54,6 @@ def get_number_of_features_that_explain_variance(
     pca.fit(data)
     cumulative_variance_pca = np.cumsum(pca.explained_variance_ratio_)
     n_features_pca = np.argmax(cumulative_variance_pca >= explained_variance_ratio) + 1
-    print('done')
     return n_features_svd, n_features_pca
 
 
@@ -127,7 +125,11 @@ def compute_k_svd_raw() -> int:
 
     5 points
     """
-    df = pd.read_csv('data_hw.csv').drop(columns=['original_title'])
+    df = pd.read_csv('data_hw.csv')
+    try:
+        df = pd.read_csv('data_hw.csv').drop(columns=['original_title'])
+    except:
+        pass
     u, s, vt = np.linalg.svd(df, full_matrices=False)
     explained_variance = np.square(s) / np.sum(np.square(s))
     cumulative_variance = np.cumsum(explained_variance)
@@ -164,7 +166,12 @@ def compute_k_svd_normalized() -> int:
 
     5 points
     """
-    df = pd.read_csv('data_hw.csv').drop(columns=['original_title'])
+    df = pd.read_csv('data_hw.csv')
+    try:
+        df = pd.read_csv('data_hw.csv').drop(columns=['original_title'])
+    except:
+        pass
+    df = normalize_columns(df)
     u, s, vt = np.linalg.svd(df, full_matrices=False)
     explained_variance = np.square(s) / np.sum(np.square(s))
     cumulative_variance = np.cumsum(explained_variance)
@@ -197,8 +204,5 @@ if __name__ == "__main__":
     assert isinstance(get_id_number(), str)
     id_number = int(get_id_number())
     assert str(id_number) == get_id_number()
-    try:
-        df = pd.read_csv('data_hw.csv').drop(columns='random')
-    except KeyError:
-        pass
-    # get_number_of_features_that_explain_variance(df, 0.3)
+
+
