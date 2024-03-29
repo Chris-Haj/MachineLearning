@@ -20,7 +20,6 @@ Submission instructions:
 
 """
 
-
 def get_id_number() -> str:
     """
     Return your ID number AS A STRING.
@@ -30,8 +29,7 @@ def get_id_number() -> str:
     Keep in mind that printing is not returning. Don't use the print statement in this function,
     only the return statement.
     """
-    raise NotImplementedError()
-
+    return '207824772'
 
 ## Functions provided for your convenience
 
@@ -78,7 +76,6 @@ def widrow_hoff_least_squares(
         errors.append(np.mean(error**2))
     return weights, errors
 
-
 def generate_correlated_data(x: np.array, correlation: float) -> np.array:
     """
     Generate a vector similar in size to x, but with a given linear correlation to x.
@@ -124,9 +121,7 @@ def pca_transform(data: np.ndarray) -> np.ndarray:
 def compute_rmse(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     return np.sqrt(np.mean((y_true - y_pred) ** 2))
 
-
 ## Questions for the student
-
 
 class LeastSquaresLinearRegression:
     def __init__(
@@ -152,7 +147,7 @@ class LeastSquaresLinearRegression:
         self.is_fitted = False
         # Add anything else you need here
         # for example self.params = None ..
-        ...
+        self.weights = None
 
     def fit(self, X: np.ndarray, y: np.ndarray):
         """
@@ -173,13 +168,20 @@ class LeastSquaresLinearRegression:
         """
 
         # Add your code here
-        ...
+
+        samples, features = X.shape
+        self.weights = np.zeros(features)
+        for _ in range(self.epochs):
+            predictions = X.dot(self.weights)
+            errors = predictions - y
+            gradient = X.T.dot(errors) / samples
+            self.weights -= self.learning_rate * gradient
 
         self.is_fitted = True
         # don't forget to return self!
         return self
 
-    def get_fitted_parameters(self) -> np.ndarray:
+    def get_fitted_parameters(self) -> np.ndarray: #Function is finished
         """
         Return the fitted parameters of the model.
 
@@ -195,9 +197,11 @@ class LeastSquaresLinearRegression:
          20 points
         """
         # add your code here
-        ...
+        if self.is_fitted:
+            return self.weights
+        raise RuntimeError('Model is not fitted')
 
-    def predict(self, X: np.ndarray) -> np.ndarray:
+    def predict(self, X: np.ndarray) -> np.ndarray: #Function is finished
         """
         Return the model's predictions on the given data.
 
@@ -219,8 +223,7 @@ class LeastSquaresLinearRegression:
         """
         if not self.is_fitted:
             raise RuntimeError("The model is not fitted")
-        # add your code here
-        ...
+        return X.dot(self.weights)
 
 
 def explore_effect_of_correlation_on_least_squares(
@@ -233,14 +236,6 @@ def explore_effect_of_correlation_on_least_squares(
     Next, it fits a model to the data and compares the fitted parameters to the known parameters.
     It repeats this process for different levels of correlation between x1 and x2, and returns the RMSE for each level
     of correlation.
-
-    I will run this function with a known set of parameters and a known set of data. I will compare the returned RMSE
-    values to the known RMSE values and if they are similar, you get points. If the RMSE values are not similar to the
-    known RMSE values, but are close enough, you will get half the points.
-    In any other case, you will get 0 points. (no partial points for returning a numpy array with the correct shape).
-    If you forget to return the values or return the values in the wrong format, you will get 0 points.
-
-
 
     Args:
         x1: a 1D numpy array with the independent variable.
@@ -261,7 +256,7 @@ def explore_effect_of_correlation_on_least_squares(
     rmse_values = []
     for corr in np.linspace(0, 1, 50):
         x2 = generate_correlated_data(x1, corr)
-        X = np.column_stack((x1, x2))
+        X = np.column_stack((np.ones(x1.shape[0]), x1, x2))
         # Add the intercept term
         X = np.column_stack((np.ones(len(x1)), X))
         assert X.shape[1] == len(
