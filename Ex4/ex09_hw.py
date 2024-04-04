@@ -1,6 +1,5 @@
 import numpy as np
 
-
 """
 
 Submission instructions:
@@ -20,6 +19,7 @@ Submission instructions:
 
 """
 
+
 def get_id_number() -> str:
     """
     Return your ID number AS A STRING.
@@ -31,11 +31,12 @@ def get_id_number() -> str:
     """
     return '207824772'
 
+
 ## Functions provided for your convenience
 
 
 def widrow_hoff_least_squares(
-    X, y, initial_guess=None, learning_rate=1e-2, epochs=1000
+        X, y, initial_guess=None, learning_rate=1e-2, epochs=1000
 ):
     """
     Implements the Widrow-Hoff least squares algorithm using gradient descent.
@@ -65,7 +66,7 @@ def widrow_hoff_least_squares(
     for _ in range(epochs):
         # Compute the predictions
         predictions = (
-            X @ weights
+                X @ weights
         )  # The @ operator in Python is used for matrix multiplication.
         # Compute the error
         error = predictions - y
@@ -73,8 +74,9 @@ def widrow_hoff_least_squares(
         gradient = X.T @ error / len(X)
         # Update the weights
         weights -= learning_rate * gradient
-        errors.append(np.mean(error**2))
+        errors.append(np.mean(error ** 2))
     return weights, errors
+
 
 def generate_correlated_data(x: np.array, correlation: float) -> np.array:
     """
@@ -87,7 +89,7 @@ def generate_correlated_data(x: np.array, correlation: float) -> np.array:
         numpy.ndarray: a vector of the same size as x, with the desired correlation to x.
 
     """
-    ret = correlation * x + np.sqrt(1 - correlation**2) * np.random.normal(
+    ret = correlation * x + np.sqrt(1 - correlation ** 2) * np.random.normal(
         0, 1, size=len(x)
     )
     return ret
@@ -121,14 +123,15 @@ def pca_transform(data: np.ndarray) -> np.ndarray:
 def compute_rmse(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     return np.sqrt(np.mean((y_true - y_pred) ** 2))
 
+
 ## Questions for the student
 
 class LeastSquaresLinearRegression:
     def __init__(
-        self,
-        learning_rate: float = 0.01,
-        epochs: int = 1000,
-        normalize_data_before_fit: bool = False,
+            self,
+            learning_rate: float = 0.01,
+            epochs: int = 1000,
+            normalize_data_before_fit: bool = False,
     ):
         """
         Initialize the instance with the given parameters.
@@ -181,7 +184,7 @@ class LeastSquaresLinearRegression:
         # don't forget to return self!
         return self
 
-    def get_fitted_parameters(self) -> np.ndarray: #Function is finished
+    def get_fitted_parameters(self) -> np.ndarray:  # Function is finished
         """
         Return the fitted parameters of the model.
 
@@ -201,7 +204,7 @@ class LeastSquaresLinearRegression:
             return self.weights
         raise RuntimeError('Model is not fitted')
 
-    def predict(self, X: np.ndarray) -> np.ndarray: #Function is finished
+    def predict(self, X: np.ndarray) -> np.ndarray:  # Function is finished
         """
         Return the model's predictions on the given data.
 
@@ -227,7 +230,7 @@ class LeastSquaresLinearRegression:
 
 
 def explore_effect_of_correlation_on_least_squares(
-    x1: np.ndarray, params: np.ndarray, pca_transform: bool = False
+        x1: np.ndarray, params: np.ndarray, pca_transform: bool = False
 ):
     """
     Explore the effect of correlation between the features on the performance of the least squares algorithm.
@@ -257,22 +260,14 @@ def explore_effect_of_correlation_on_least_squares(
     for corr in np.linspace(0, 1, 50):
         x2 = generate_correlated_data(x1, corr)
         X = np.column_stack((np.ones(x1.shape[0]), x1, x2))
-        # Add the intercept term
-        X = np.column_stack((np.ones(len(x1)), X))
-        assert X.shape[1] == len(
-            params
-        )  # make sure the number of parameters is correct
-        # generate the dependent variable
-        y = X @ params + np.random.normal(0, 1, len(x1))
-        model = LeastSquaresLinearRegression(normalize_data_before_fit=True)
-        # Fit the model
-        ...  # Add your code here
-        # Get the fitted parameters
+        if pca_transform:
+            X = PCA_TRANS(X)
+        y = X.dot(params) + np.random.normal(0, 1, x1.shape[0])
+        model = LeastSquaresLinearRegression()
+        model.fit(X, y)
         fitted_params = model.get_fitted_parameters()
-        # Compare the fitted parameters to the known parameters
         rmse = compute_rmse(params, fitted_params)
-        ...
-    # convert the rmse_values to a numpy array and return it
+        rmse_values.append(rmse)
     return np.array(rmse_values)
 
 
@@ -307,7 +302,10 @@ def explain_effect_of_correlation_on_least_squares_no_pca():
     20 points
     """
     return """
-        your observations here
+    With the PCA, the possibly correlated features are transformed
+    into a new set of linearly uncorrelated components. With this, the root mean squared
+    errors are much higher across all levels of correlation compared to wihtout PCA
+    and they show an inrcrease for higher levels of correlation. 
     """
 
 
@@ -348,6 +346,20 @@ def explain_effect_of_correlation_on_least_squares_with_pca():
      20 points
     """
     return """
-        your observations here
-    
+    Without the PCA, the model is exposed to raw data, which when the correlation between features increases
+    the root mean squared error also tends to increase, especially more noticeable in the higher correlation values.
     """
+
+
+def PCA_TRANS(data: np.ndarray) -> np.ndarray:
+    data -= np.mean(data, axis=0)
+    # Calculate the covariance matrix
+    cov = np.cov(data, rowvar=False)
+    # Calculate the eigenvectors and eigenvalues
+    eigvals, eigvecs = np.linalg.eigh(cov)
+    # Sort the eigenvectors by decreasing eigenvalues
+    idx = np.argsort(eigvals)[::-1]
+    eigvecs = eigvecs[:, idx]
+    # Transform the data
+    return data @ eigvecs
+
