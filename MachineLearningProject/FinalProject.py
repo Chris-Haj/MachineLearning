@@ -43,7 +43,7 @@ def gradient_descent(X, y, theta, alpha, num_iters):
 
 
 # Step 6: Visualize the convergence
-def plot_convergence(J_history, title='Convergence of Gradient Descent'):
+def plot_convergence(J_history, title='Convergence of Gradient Descent',):
     plt.plot(J_history)
     plt.xlabel('Iterations')
     plt.ylabel('Cost')
@@ -52,30 +52,32 @@ def plot_convergence(J_history, title='Convergence of Gradient Descent'):
 
 
 # Initializations
-theta = np.zeros(X_normalized.shape[1])
-alpha = 0.005
+
+alpha = [0.001, 0.01, 0.1, 0.5]
 iterations = 1000
 
 # Run Gradient Descent
-theta, J_history = gradient_descent(X_normalized, y_normalized, theta, alpha, iterations)
+
+for i in alpha:
+    theta = np.zeros(X_normalized.shape[1])
+    theta, J_history = gradient_descent(X_normalized, y_normalized, theta, i, iterations)
+    plot_convergence(J_history, title=f'Convergence of Gradient Descent with alpha ={i}')
 
 # Plotting the convergence of the cost function
-plot_convergence(J_history)
 
 
 # Step 7: Mini-batch gradient descent function
-def mini_batch_gradient_descent(X, y, theta, alpha, batch_size):
+def mini_batch_gradient_descent(X, y, theta, alpha, iterations, batch_size):
     m = len(y)
     J_history = []
     n_batches = int(m / batch_size)
 
 
-    for i in range(n_batches):
+    for i in range(iterations):
         indices = np.random.permutation(m)
-        print(indices)
         X_shuffled = X[indices]
         y_shuffled = y[indices]
-        for batch in range(batch_size):
+        for batch in range(n_batches):
             start = batch * batch_size
             end = start + batch_size
             X_batch = X_shuffled[start:end]
@@ -86,17 +88,20 @@ def mini_batch_gradient_descent(X, y, theta, alpha, batch_size):
             theta -= (alpha / batch_size) * error
 
             # Compute cost for the whole dataset to monitor the progress
-        J_history.append(compute_cost(X, y, theta))
-
+            J_history.append(compute_cost(X, y, theta))
     return theta, J_history
 
 
 # Settings for mini-batch gradient descent
 batch_size = 16  # Adjust based on your dataset and computational resources
-theta_mini_batch, J_history_mini_batch = mini_batch_gradient_descent(X_normalized, y_normalized, theta, alpha, batch_size)
+for i in alpha:
+    theta = np.zeros(X_normalized.shape[1])
+    theta_mini_batch, J_history_mini_batch = mini_batch_gradient_descent(X_normalized, y_normalized, theta, i, iterations, batch_size)
+    plot_convergence(J_history_mini_batch, title=f'Convergence of Mini-Batch Gradient Descent with alpha ={i}')
+# theta_mini_batch, J_history_mini_batch = mini_batch_gradient_descent(X_normalized, y_normalized, theta, alpha, iterations, batch_size)
 
 # Plot convergence graph for mini-batch gradient descent
-plot_convergence(J_history_mini_batch, title='Convergence of Mini-Batch Gradient Descent')
+# plot_convergence(J_history_mini_batch, title='Convergence of Mini-Batch Gradient Descent')
 
 
 # Step 8: Dimensionality reduction with SVD
