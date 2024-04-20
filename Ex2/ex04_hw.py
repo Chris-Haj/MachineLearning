@@ -216,3 +216,8 @@ def actors_with_highest_median_score(
 
 
 
+if __name__ == '__main__':
+    actors = 'actors.csv'
+    movies = 'tmdb_5000_movies.csv'
+
+    print(repeated_movie_titles(actors))
