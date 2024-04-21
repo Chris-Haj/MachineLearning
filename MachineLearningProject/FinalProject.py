@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from numpy.linalg import svd
 
 # Step 1: Read the data
-data = pd.read_csv('cancer_data.csv')
+data = pd.read_csv('cancer_data.csv').head(20)
 X = data.iloc[:, :-1].values  # assuming the last column is the target variable
 y = data.iloc[:, -1].values
 
@@ -61,6 +61,7 @@ iterations = 1000
 for i in alpha:
     theta = np.zeros(X_normalized.shape[1])
     theta, J_history = gradient_descent(X_normalized, y_normalized, theta, i, iterations)
+
     plot_convergence(J_history, title=f'Convergence of Gradient Descent with alpha ={i}')
 
 # Plotting the convergence of the cost function
